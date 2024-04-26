@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsRatingsMapper">
+    
+    <resultMap type="YspsRatings" id="YspsRatingsResult">
+        <result property="ratingid"    column="ratingid"    />
+        <result property="eventid"    column="eventid"    />
+        <result property="userid"    column="userid"    />
+        <result property="rating"    column="rating"    />
+        <result property="comment"    column="comment"    />
+        <result property="ratingtime"    column="ratingtime"    />
+    </resultMap>
+
+    <sql id="selectYspsRatingsVo">
+        select ratingid, eventid, userid, rating, comment, ratingtime from ysps_ratings
+    </sql>
+
+    <select id="selectYspsRatingsList" parameterType="YspsRatings" resultMap="YspsRatingsResult">
+        <include refid="selectYspsRatingsVo"/>
+        <where>  
+            <if test="eventid != null "> and eventid = #{eventid}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsRatingsByRatingid" parameterType="Long" resultMap="YspsRatingsResult">
+        <include refid="selectYspsRatingsVo"/>
+        where ratingid = #{ratingid}
+    </select>
+        
+    <insert id="insertYspsRatings" parameterType="YspsRatings" useGeneratedKeys="true" keyProperty="ratingid">
+        insert into ysps_ratings
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eventid != null">eventid,</if>
+            <if test="userid != null">userid,</if>
+            <if test="rating != null">rating,</if>
+            <if test="comment != null">comment,</if>
+            <if test="ratingtime != null">ratingtime,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eventid != null">#{eventid},</if>
+            <if test="userid != null">#{userid},</if>
+            <if test="rating != null">#{rating},</if>
+            <if test="comment != null">#{comment},</if>
+            <if test="ratingtime != null">#{ratingtime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsRatings" parameterType="YspsRatings">
+        update ysps_ratings
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eventid != null">eventid = #{eventid},</if>
+            <if test="userid != null">userid = #{userid},</if>
+            <if test="rating != null">rating = #{rating},</if>
+            <if test="comment != null">comment = #{comment},</if>
+            <if test="ratingtime != null">ratingtime = #{ratingtime},</if>
+        </trim>
+        where ratingid = #{ratingid}
+    </update>
+
+    <delete id="deleteYspsRatingsByRatingid" parameterType="Long">
+        delete from ysps_ratings where ratingid = #{ratingid}
+    </delete>
+
+    <delete id="deleteYspsRatingsByRatingids" parameterType="String">
+        delete from ysps_ratings where ratingid in 
+        <foreach item="ratingid" collection="array" open="(" separator="," close=")">
+            #{ratingid}
+        </foreach>
+    </delete>
+</mapper>

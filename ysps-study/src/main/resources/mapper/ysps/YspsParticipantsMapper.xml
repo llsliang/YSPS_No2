@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsParticipantsMapper">
+    
+    <resultMap type="YspsParticipants" id="YspsParticipantsResult">
+        <result property="participantid"    column="participantid"    />
+        <result property="eventid"    column="eventid"    />
+        <result property="userid"    column="userid"    />
+        <result property="signuptime"    column="signuptime"    />
+        <result property="checkin"    column="checkin"    />
+    </resultMap>
+
+    <sql id="selectYspsParticipantsVo">
+        select participantid, eventid, userid, signuptime, checkin from ysps_participants
+    </sql>
+
+    <select id="selectYspsParticipantsList" parameterType="YspsParticipants" resultMap="YspsParticipantsResult">
+        <include refid="selectYspsParticipantsVo"/>
+        <where>  
+            <if test="eventid != null "> and eventid = #{eventid}</if>
+            <if test="userid != null "> and userid = #{userid}</if>
+            <if test="signuptime != null "> and signuptime = #{signuptime}</if>
+            <if test="checkin != null "> and checkin = #{checkin}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsParticipantsByParticipantid" parameterType="Long" resultMap="YspsParticipantsResult">
+        <include refid="selectYspsParticipantsVo"/>
+        where participantid = #{participantid}
+    </select>
+        
+    <insert id="insertYspsParticipants" parameterType="YspsParticipants" useGeneratedKeys="true" keyProperty="participantid">
+        insert into ysps_participants
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eventid != null">eventid,</if>
+            <if test="userid != null">userid,</if>
+            <if test="signuptime != null">signuptime,</if>
+            <if test="checkin != null">checkin,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eventid != null">#{eventid},</if>
+            <if test="userid != null">#{userid},</if>
+            <if test="signuptime != null">#{signuptime},</if>
+            <if test="checkin != null">#{checkin},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsParticipants" parameterType="YspsParticipants">
+        update ysps_participants
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eventid != null">eventid = #{eventid},</if>
+            <if test="userid != null">userid = #{userid},</if>
+            <if test="signuptime != null">signuptime = #{signuptime},</if>
+            <if test="checkin != null">checkin = #{checkin},</if>
+        </trim>
+        where participantid = #{participantid}
+    </update>
+
+    <delete id="deleteYspsParticipantsByParticipantid" parameterType="Long">
+        delete from ysps_participants where participantid = #{participantid}
+    </delete>
+
+    <delete id="deleteYspsParticipantsByParticipantids" parameterType="String">
+        delete from ysps_participants where participantid in 
+        <foreach item="participantid" collection="array" open="(" separator="," close=")">
+            #{participantid}
+        </foreach>
+    </delete>
+</mapper>

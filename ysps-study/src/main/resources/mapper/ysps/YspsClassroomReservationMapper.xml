@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsClassroomReservationMapper">
+    
+    <resultMap type="YspsClassroomReservation" id="YspsClassroomReservationResult">
+        <result property="reservationId"    column="reservation_id"    />
+        <result property="classroomId"    column="classroom_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="username"    column="username"    />
+        <result property="seatNumber"    column="seat_number"    />
+        <result property="reservationDate"    column="reservation_date"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="status"    column="status"    />
+        <result property="createdAt"    column="created_at"    />
+    </resultMap>
+
+    <sql id="selectYspsClassroomReservationVo">
+        select reservation_id, classroom_id, user_id, username, seat_number, reservation_date, start_time, end_time, status, created_at from ysps_classroom_reservation
+    </sql>
+
+    <select id="selectYspsClassroomReservationList" parameterType="YspsClassroomReservation" resultMap="YspsClassroomReservationResult">
+        <include refid="selectYspsClassroomReservationVo"/>
+        <where>  
+            <if test="classroomId != null "> and classroom_id = #{classroomId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="reservationDate != null "> and reservation_date = #{reservationDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsClassroomReservationByReservationId" parameterType="Long" resultMap="YspsClassroomReservationResult">
+        <include refid="selectYspsClassroomReservationVo"/>
+        where reservation_id = #{reservationId}
+    </select>
+        
+    <insert id="insertYspsClassroomReservation" parameterType="YspsClassroomReservation" useGeneratedKeys="true" keyProperty="reservationId">
+        insert into ysps_classroom_reservation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="classroomId != null">classroom_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="username != null">username,</if>
+            <if test="seatNumber != null">seat_number,</if>
+            <if test="reservationDate != null">reservation_date,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="status != null">status,</if>
+            <if test="createdAt != null">created_at,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="classroomId != null">#{classroomId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="username != null">#{username},</if>
+            <if test="seatNumber != null">#{seatNumber},</if>
+            <if test="reservationDate != null">#{reservationDate},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsClassroomReservation" parameterType="YspsClassroomReservation">
+        update ysps_classroom_reservation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="classroomId != null">classroom_id = #{classroomId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="username != null">username = #{username},</if>
+            <if test="seatNumber != null">seat_number = #{seatNumber},</if>
+            <if test="reservationDate != null">reservation_date = #{reservationDate},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+        </trim>
+        where reservation_id = #{reservationId}
+    </update>
+
+    <delete id="deleteYspsClassroomReservationByReservationId" parameterType="Long">
+        delete from ysps_classroom_reservation where reservation_id = #{reservationId}
+    </delete>
+
+    <delete id="deleteYspsClassroomReservationByReservationIds" parameterType="String">
+        delete from ysps_classroom_reservation where reservation_id in 
+        <foreach item="reservationId" collection="array" open="(" separator="," close=")">
+            #{reservationId}
+        </foreach>
+    </delete>
+<!--    // MyBatis Mapper XML 文件-->
+    <select id="selectYspsClassroomReservationByUsername" resultType="YspsClassroomReservation">
+        SELECT * FROM ysps_classroom_reservation
+        WHERE username = #{username}
+    </select>
+</mapper>

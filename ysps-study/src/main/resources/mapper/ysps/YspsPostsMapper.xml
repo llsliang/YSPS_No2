@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsPostsMapper">
+    
+    <resultMap type="YspsPosts" id="YspsPostsResult">
+        <result property="postid"    column="postid"    />
+        <result property="username"    column="username"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="posttime"    column="posttime"    />
+        <result property="lastupdatetime"    column="lastupdatetime"    />
+        <result property="replycount"    column="replycount"    />
+        <result property="mediacontent"    column="mediacontent"    />
+        <result property="views"    column="views"    />
+    </resultMap>
+
+    <resultMap id="YspsPostsYspsRepliesResult" type="YspsPosts" extends="YspsPostsResult">
+        <collection property="yspsRepliesList" notNullColumn="sub_replyid" javaType="java.util.List" resultMap="YspsRepliesResult" />
+    </resultMap>
+
+    <resultMap type="YspsReplies" id="YspsRepliesResult">
+        <result property="replyid"    column="sub_replyid"    />
+        <result property="postid"    column="sub_postid"    />
+        <result property="username"    column="sub_username"    />
+        <result property="content"    column="sub_content"    />
+        <result property="replytime"    column="sub_replytime"    />
+    </resultMap>
+
+    <sql id="selectYspsPostsVo">
+        select postid, username, title, content, posttime, lastupdatetime, replycount, mediacontent, views from ysps_posts
+    </sql>
+
+    <select id="selectYspsPostsList" parameterType="YspsPosts" resultMap="YspsPostsResult">
+        <include refid="selectYspsPostsVo"/>
+        <where>  
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="posttime != null "> and posttime = #{posttime}</if>
+            <if test="lastupdatetime != null "> and lastupdatetime = #{lastupdatetime}</if>
+            <if test="replycount != null "> and replycount = #{replycount}</if>
+            <if test="views != null "> and views = #{views}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsPostsByPostid" parameterType="Long" resultMap="YspsPostsYspsRepliesResult">
+        select a.postid, a.username, a.title, a.content, a.posttime, a.lastupdatetime, a.replycount, a.mediacontent, a.views,
+ b.replyid as sub_replyid, b.postid as sub_postid, b.username as sub_username, b.content as sub_content, b.replytime as sub_replytime
+        from ysps_posts a
+        left join ysps_replies b on b.postid = a.postid
+        where a.postid = #{postid}
+    </select>
+        
+    <insert id="insertYspsPosts" parameterType="YspsPosts" useGeneratedKeys="true" keyProperty="postid">
+        insert into ysps_posts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="username != null">username,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="posttime != null">posttime,</if>
+            <if test="lastupdatetime != null">lastupdatetime,</if>
+            <if test="replycount != null">replycount,</if>
+            <if test="mediacontent != null">mediacontent,</if>
+            <if test="views != null">views,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="username != null">#{username},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="posttime != null">#{posttime},</if>
+            <if test="lastupdatetime != null">#{lastupdatetime},</if>
+            <if test="replycount != null">#{replycount},</if>
+            <if test="mediacontent != null">#{mediacontent},</if>
+            <if test="views != null">#{views},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsPosts" parameterType="YspsPosts">
+        update ysps_posts
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null">username = #{username},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="posttime != null">posttime = #{posttime},</if>
+            <if test="lastupdatetime != null">lastupdatetime = #{lastupdatetime},</if>
+            <if test="replycount != null">replycount = #{replycount},</if>
+            <if test="mediacontent != null">mediacontent = #{mediacontent},</if>
+            <if test="views != null">views = #{views},</if>
+        </trim>
+        where postid = #{postid}
+    </update>
+
+    <delete id="deleteYspsPostsByPostid" parameterType="Long">
+        delete from ysps_posts where postid = #{postid}
+    </delete>
+
+    <delete id="deleteYspsPostsByPostids" parameterType="String">
+        delete from ysps_posts where postid in 
+        <foreach item="postid" collection="array" open="(" separator="," close=")">
+            #{postid}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteYspsRepliesByPostids" parameterType="String">
+        delete from ysps_replies where postid in 
+        <foreach item="postid" collection="array" open="(" separator="," close=")">
+            #{postid}
+        </foreach>
+    </delete>
+
+    <delete id="deleteYspsRepliesByPostid" parameterType="Long">
+        delete from ysps_replies where postid = #{postid}
+    </delete>
+
+    <insert id="batchYspsReplies">
+        insert into ysps_replies( replyid, postid, username, content, replytime) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.replyid}, #{item.postid}, #{item.username}, #{item.content}, #{item.replytime})
+        </foreach>
+    </insert>
+    <update id="incrementPostViews">
+        UPDATE ysps_posts
+        SET views = views + 1
+        WHERE postid = #{postid}
+    </update>
+</mapper>

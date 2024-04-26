@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsRecruitmentMapper">
+    
+    <resultMap type="YspsRecruitment" id="YspsRecruitmentResult">
+        <result property="jobId"    column="job_id"    />
+        <result property="jobTitle"    column="job_title"    />
+        <result property="jobLocation"    column="job_location"    />
+        <result property="jobType"    column="job_type"    />
+        <result property="postingDate"    column="posting_date"    />
+        <result property="closingDate"    column="closing_date"    />
+        <result property="jobResponsibilities"    column="job_responsibilities"    />
+        <result property="jobRequirements"    column="job_requirements"    />
+        <result property="salaryRange"    column="salary_range"    />
+        <result property="benefits"    column="benefits"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="contactEmail"    column="contact_email"    />
+        <result property="contactPhone"    column="contact_phone"    />
+        <result property="applicationMaterials"    column="application_materials"    />
+    </resultMap>
+
+    <sql id="selectYspsRecruitmentVo">
+        select job_id, job_title, job_location, job_type, posting_date, closing_date, job_responsibilities, job_requirements, salary_range, benefits, contact_person, contact_email, contact_phone, application_materials from ysps_recruitment
+    </sql>
+
+    <select id="selectYspsRecruitmentList" parameterType="YspsRecruitment" resultMap="YspsRecruitmentResult">
+        <include refid="selectYspsRecruitmentVo"/>
+        <where>  
+            <if test="jobId != null "> and job_id = #{jobId}</if>
+            <if test="jobTitle != null  and jobTitle != ''"> and job_title = #{jobTitle}</if>
+            <if test="jobLocation != null  and jobLocation != ''"> and job_location = #{jobLocation}</if>
+            <if test="jobType != null  and jobType != ''"> and job_type = #{jobType}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsRecruitmentByJobId" parameterType="Long" resultMap="YspsRecruitmentResult">
+        <include refid="selectYspsRecruitmentVo"/>
+        where job_id = #{jobId}
+    </select>
+        
+    <insert id="insertYspsRecruitment" parameterType="YspsRecruitment">
+        insert into ysps_recruitment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="jobId != null">job_id,</if>
+            <if test="jobTitle != null">job_title,</if>
+            <if test="jobLocation != null">job_location,</if>
+            <if test="jobType != null">job_type,</if>
+            <if test="postingDate != null">posting_date,</if>
+            <if test="closingDate != null">closing_date,</if>
+            <if test="jobResponsibilities != null">job_responsibilities,</if>
+            <if test="jobRequirements != null">job_requirements,</if>
+            <if test="salaryRange != null">salary_range,</if>
+            <if test="benefits != null">benefits,</if>
+            <if test="contactPerson != null">contact_person,</if>
+            <if test="contactEmail != null">contact_email,</if>
+            <if test="contactPhone != null">contact_phone,</if>
+            <if test="applicationMaterials != null">application_materials,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="jobId != null">#{jobId},</if>
+            <if test="jobTitle != null">#{jobTitle},</if>
+            <if test="jobLocation != null">#{jobLocation},</if>
+            <if test="jobType != null">#{jobType},</if>
+            <if test="postingDate != null">#{postingDate},</if>
+            <if test="closingDate != null">#{closingDate},</if>
+            <if test="jobResponsibilities != null">#{jobResponsibilities},</if>
+            <if test="jobRequirements != null">#{jobRequirements},</if>
+            <if test="salaryRange != null">#{salaryRange},</if>
+            <if test="benefits != null">#{benefits},</if>
+            <if test="contactPerson != null">#{contactPerson},</if>
+            <if test="contactEmail != null">#{contactEmail},</if>
+            <if test="contactPhone != null">#{contactPhone},</if>
+            <if test="applicationMaterials != null">#{applicationMaterials},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsRecruitment" parameterType="YspsRecruitment">
+        update ysps_recruitment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="jobTitle != null">job_title = #{jobTitle},</if>
+            <if test="jobLocation != null">job_location = #{jobLocation},</if>
+            <if test="jobType != null">job_type = #{jobType},</if>
+            <if test="postingDate != null">posting_date = #{postingDate},</if>
+            <if test="closingDate != null">closing_date = #{closingDate},</if>
+            <if test="jobResponsibilities != null">job_responsibilities = #{jobResponsibilities},</if>
+            <if test="jobRequirements != null">job_requirements = #{jobRequirements},</if>
+            <if test="salaryRange != null">salary_range = #{salaryRange},</if>
+            <if test="benefits != null">benefits = #{benefits},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="contactEmail != null">contact_email = #{contactEmail},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="applicationMaterials != null">application_materials = #{applicationMaterials},</if>
+        </trim>
+        where job_id = #{jobId}
+    </update>
+
+    <delete id="deleteYspsRecruitmentByJobId" parameterType="Long">
+        delete from ysps_recruitment where job_id = #{jobId}
+    </delete>
+
+    <delete id="deleteYspsRecruitmentByJobIds" parameterType="String">
+        delete from ysps_recruitment where job_id in 
+        <foreach item="jobId" collection="array" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+    </delete>
+</mapper>

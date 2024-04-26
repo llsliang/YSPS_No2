@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsClassroomsMapper">
+    
+    <resultMap type="YspsClassrooms" id="YspsClassroomsResult">
+        <result property="classroomid"    column="classroomid"    />
+        <result property="classname"    column="classname"    />
+        <result property="capacity"    column="capacity"    />
+        <result property="status"    column="status"    />
+        <result property="currentSeating"    column="current_seating"    />
+        <result property="reservedSeats"    column="reserved_seats"    />
+    </resultMap>
+
+    <resultMap id="YspsClassroomsYspsClassroomReservationResult" type="YspsClassrooms" extends="YspsClassroomsResult">
+        <collection property="yspsClassroomReservationList" notNullColumn="sub_reservation_id" javaType="java.util.List" resultMap="YspsClassroomReservationResult" />
+    </resultMap>
+
+    <resultMap type="YspsClassroomReservation" id="YspsClassroomReservationResult">
+        <result property="reservationId"    column="sub_reservation_id"    />
+        <result property="classroomId"    column="sub_classroom_id"    />
+        <result property="userId"    column="sub_user_id"    />
+        <result property="seatNumber"    column="sub_seat_number"    />
+        <result property="reservationDate"    column="sub_reservation_date"    />
+        <result property="startTime"    column="sub_start_time"    />
+        <result property="endTime"    column="sub_end_time"    />
+        <result property="status"    column="sub_status"    />
+        <result property="createdAt"    column="sub_created_at"    />
+    </resultMap>
+
+    <sql id="selectYspsClassroomsVo">
+        select classroomid, classname, capacity, status, current_seating, reserved_seats from ysps_classrooms
+    </sql>
+
+    <select id="selectYspsClassroomsList" parameterType="YspsClassrooms" resultMap="YspsClassroomsResult">
+        <include refid="selectYspsClassroomsVo"/>
+        <where>  
+            <if test="classname != null  and classname != ''"> and classname like concat('%', #{classname}, '%')</if>
+            <if test="capacity != null "> and capacity = #{capacity}</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsClassroomsByClassroomid" parameterType="Long" resultMap="YspsClassroomsYspsClassroomReservationResult">
+        select a.classroomid, a.classname, a.capacity, a.status, a.current_seating, a.reserved_seats,
+ b.reservation_id as sub_reservation_id, b.classroom_id as sub_classroom_id, b.user_id as sub_user_id, b.seat_number as sub_seat_number, b.reservation_date as sub_reservation_date, b.start_time as sub_start_time, b.end_time as sub_end_time, b.status as sub_status, b.created_at as sub_created_at
+        from ysps_classrooms a
+        left join ysps_classroom_reservation b on b.classroom_id = a.classroomid
+        where a.classroomid = #{classroomid}
+    </select>
+        
+    <insert id="insertYspsClassrooms" parameterType="YspsClassrooms" useGeneratedKeys="true" keyProperty="classroomid">
+        insert into ysps_classrooms
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="classname != null and classname != ''">classname,</if>
+            <if test="capacity != null">capacity,</if>
+            <if test="status != null">status,</if>
+            <if test="currentSeating != null">current_seating,</if>
+            <if test="reservedSeats != null">reserved_seats,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="classname != null and classname != ''">#{classname},</if>
+            <if test="capacity != null">#{capacity},</if>
+            <if test="status != null">#{status},</if>
+            <if test="currentSeating != null">#{currentSeating},</if>
+            <if test="reservedSeats != null">#{reservedSeats},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsClassrooms" parameterType="YspsClassrooms">
+        update ysps_classrooms
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="classname != null and classname != ''">classname = #{classname},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="currentSeating != null">current_seating = #{currentSeating},</if>
+            <if test="reservedSeats != null">reserved_seats = #{reservedSeats},</if>
+        </trim>
+        where classroomid = #{classroomid}
+    </update>
+
+    <delete id="deleteYspsClassroomsByClassroomid" parameterType="Long">
+        delete from ysps_classrooms where classroomid = #{classroomid}
+    </delete>
+
+    <delete id="deleteYspsClassroomsByClassroomids" parameterType="String">
+        delete from ysps_classrooms where classroomid in 
+        <foreach item="classroomid" collection="array" open="(" separator="," close=")">
+            #{classroomid}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteYspsClassroomReservationByClassroomIds" parameterType="String">
+        delete from ysps_classroom_reservation where classroom_id in 
+        <foreach item="classroomId" collection="array" open="(" separator="," close=")">
+            #{classroomId}
+        </foreach>
+    </delete>
+<!--    <delete id="deleteYspsClassroomReservationByClassroomId"></delete>-->
+
+        <delete id="deleteYspsClassroomReservationByClassroomId" parameterType="Long">
+        delete from ysps_classroom_reservation where classroom_id = #{classroomId}
+    </delete>
+
+    <insert id="batchYspsClassroomReservation">
+        insert into ysps_classroom_reservation( reservation_id, classroom_id, user_id, seat_number, reservation_date, start_time, end_time, status, created_at) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.reservationId}, #{item.classroomId}, #{item.userId}, #{item.seatNumber}, #{item.reservationDate}, #{item.startTime}, #{item.endTime}, #{item.status}, #{item.createdAt})
+        </foreach>
+    </insert>
+    <!-- 修改教室预约人数 -->
+    <update id="updateReservedSeats" parameterType="YspsClassrooms">
+        update ysps_classrooms
+        set reserved_seats = #{reservedSeats}
+        where classroomid = #{classroomid}
+    </update>
+
+    <!-- 修改教室落座人数 -->
+    <update id="updateCurrentSeating" parameterType="YspsClassrooms">
+        update ysps_classrooms
+        set current_seating = #{currentSeating}
+        where classroomid = #{classroomid}
+    </update>
+</mapper>

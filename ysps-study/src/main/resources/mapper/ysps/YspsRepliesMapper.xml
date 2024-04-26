@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsRepliesMapper">
+    
+    <resultMap type="YspsReplies" id="YspsRepliesResult">
+        <result property="replyid"    column="replyid"    />
+        <result property="postid"    column="postid"    />
+        <result property="username"    column="username"    />
+        <result property="content"    column="content"    />
+        <result property="replytime"    column="replytime"    />
+    </resultMap>
+
+    <sql id="selectYspsRepliesVo">
+        select replyid, postid, username, content, replytime from ysps_replies
+    </sql>
+
+    <select id="selectYspsRepliesList" parameterType="YspsReplies" resultMap="YspsRepliesResult">
+        <include refid="selectYspsRepliesVo"/>
+        <where>  
+            <if test="postid != null "> and postid = #{postid}</if>
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="replytime != null "> and replytime = #{replytime}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsRepliesByReplyid" parameterType="Long" resultMap="YspsRepliesResult">
+        <include refid="selectYspsRepliesVo"/>
+        where replyid = #{replyid}
+    </select>
+        
+    <insert id="insertYspsReplies" parameterType="YspsReplies" useGeneratedKeys="true" keyProperty="replyid">
+        insert into ysps_replies
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="postid != null">postid,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="replytime != null">replytime,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="postid != null">#{postid},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="replytime != null">#{replytime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsReplies" parameterType="YspsReplies">
+        update ysps_replies
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="postid != null">postid = #{postid},</if>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="replytime != null">replytime = #{replytime},</if>
+        </trim>
+        where replyid = #{replyid}
+    </update>
+
+    <delete id="deleteYspsRepliesByReplyid" parameterType="Long">
+        delete from ysps_replies where replyid = #{replyid}
+    </delete>
+
+    <delete id="deleteYspsRepliesByReplyids" parameterType="String">
+        delete from ysps_replies where replyid in 
+        <foreach item="replyid" collection="array" open="(" separator="," close=")">
+            #{replyid}
+        </foreach>
+    </delete>
+</mapper>

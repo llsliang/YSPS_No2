@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsEventsMapper">
+    
+    <resultMap type="YspsEvents" id="YspsEventsResult">
+        <result property="eventid"    column="eventid"    />
+        <result property="publisherid"    column="publisherid"    />
+        <result property="eventname"    column="eventname"    />
+        <result property="eventtime"    column="eventtime"    />
+        <result property="eventlocation"    column="eventlocation"    />
+        <result property="eventtype"    column="eventtype"    />
+        <result property="description"    column="description"    />
+    </resultMap>
+
+    <resultMap id="YspsEventsYspsParticipantsResult" type="YspsEvents" extends="YspsEventsResult">
+        <collection property="yspsParticipantsList" notNullColumn="sub_participantid" javaType="java.util.List" resultMap="YspsParticipantsResult" />
+    </resultMap>
+
+    <resultMap type="YspsParticipants" id="YspsParticipantsResult">
+        <result property="participantid"    column="sub_participantid"    />
+        <result property="eventid"    column="sub_eventid"    />
+        <result property="userid"    column="sub_userid"    />
+        <result property="signuptime"    column="sub_signuptime"    />
+        <result property="checkin"    column="sub_checkin"    />
+    </resultMap>
+
+    <sql id="selectYspsEventsVo">
+        select eventid, publisherid, eventname, eventtime, eventlocation, eventtype, description from ysps_events
+    </sql>
+
+    <select id="selectYspsEventsList" parameterType="YspsEvents" resultMap="YspsEventsResult">
+        <include refid="selectYspsEventsVo"/>
+        <where>  
+            <if test="eventname != null  and eventname != ''"> and eventname like concat('%', #{eventname}, '%')</if>
+            <if test="eventtime != null "> and eventtime = #{eventtime}</if>
+            <if test="eventtype != null  and eventtype != ''"> and eventtype = #{eventtype}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsEventsByEventid" parameterType="Long" resultMap="YspsEventsYspsParticipantsResult">
+        select a.eventid, a.publisherid, a.eventname, a.eventtime, a.eventlocation, a.eventtype, a.description,
+ b.participantid as sub_participantid, b.eventid as sub_eventid, b.userid as sub_userid, b.signuptime as sub_signuptime, b.checkin as sub_checkin
+        from ysps_events a
+        left join ysps_participants b on b.eventid = a.eventid
+        where a.eventid = #{eventid}
+    </select>
+        
+    <insert id="insertYspsEvents" parameterType="YspsEvents" useGeneratedKeys="true" keyProperty="eventid">
+        insert into ysps_events
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="publisherid != null">publisherid,</if>
+            <if test="eventname != null and eventname != ''">eventname,</if>
+            <if test="eventtime != null">eventtime,</if>
+            <if test="eventlocation != null and eventlocation != ''">eventlocation,</if>
+            <if test="eventtype != null and eventtype != ''">eventtype,</if>
+            <if test="description != null">description,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="publisherid != null">#{publisherid},</if>
+            <if test="eventname != null and eventname != ''">#{eventname},</if>
+            <if test="eventtime != null">#{eventtime},</if>
+            <if test="eventlocation != null and eventlocation != ''">#{eventlocation},</if>
+            <if test="eventtype != null and eventtype != ''">#{eventtype},</if>
+            <if test="description != null">#{description},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsEvents" parameterType="YspsEvents">
+        update ysps_events
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="publisherid != null">publisherid = #{publisherid},</if>
+            <if test="eventname != null and eventname != ''">eventname = #{eventname},</if>
+            <if test="eventtime != null">eventtime = #{eventtime},</if>
+            <if test="eventlocation != null and eventlocation != ''">eventlocation = #{eventlocation},</if>
+            <if test="eventtype != null and eventtype != ''">eventtype = #{eventtype},</if>
+            <if test="description != null">description = #{description},</if>
+        </trim>
+        where eventid = #{eventid}
+    </update>
+
+    <delete id="deleteYspsEventsByEventid" parameterType="Long">
+        delete from ysps_events where eventid = #{eventid}
+    </delete>
+
+    <delete id="deleteYspsEventsByEventids" parameterType="String">
+        delete from ysps_events where eventid in 
+        <foreach item="eventid" collection="array" open="(" separator="," close=")">
+            #{eventid}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteYspsParticipantsByEventids" parameterType="String">
+        delete from ysps_participants where eventid in 
+        <foreach item="eventid" collection="array" open="(" separator="," close=")">
+            #{eventid}
+        </foreach>
+    </delete>
+
+    <delete id="deleteYspsParticipantsByEventid" parameterType="Long">
+        delete from ysps_participants where eventid = #{eventid}
+    </delete>
+
+    <insert id="batchYspsParticipants">
+        insert into ysps_participants( participantid, eventid, userid, signuptime, checkin) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.participantid}, #{item.eventid}, #{item.userid}, #{item.signuptime}, #{item.checkin})
+        </foreach>
+    </insert>
+</mapper>

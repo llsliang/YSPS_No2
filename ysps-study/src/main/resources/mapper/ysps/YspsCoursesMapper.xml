@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsCoursesMapper">
+    
+    <resultMap type="YspsCourses" id="YspsCoursesResult">
+        <result property="courseid"    column="courseid"    />
+        <result property="coursename"    column="coursename"    />
+        <result property="teacher"    column="teacher"    />
+        <result property="classtime"    column="classtime"    />
+        <result property="location"    column="location"    />
+        <result property="coursetype"    column="coursetype"    />
+        <result property="credits"    column="credits"    />
+        <result property="description"    column="description"    />
+    </resultMap>
+
+    <sql id="selectYspsCoursesVo">
+        select courseid, coursename, teacher, classtime, location, coursetype, credits, description from ysps_courses
+    </sql>
+
+    <select id="selectYspsCoursesList" parameterType="YspsCourses" resultMap="YspsCoursesResult">
+        <include refid="selectYspsCoursesVo"/>
+        <where>  
+            <if test="coursename != null  and coursename != ''"> and coursename like concat('%', #{coursename}, '%')</if>
+            <if test="teacher != null  and teacher != ''"> and teacher like concat('%', #{teacher}, '%')</if>
+            <if test="coursetype != null  and coursetype != ''"> and coursetype = #{coursetype}</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsCoursesByCourseid" parameterType="Long" resultMap="YspsCoursesResult">
+        <include refid="selectYspsCoursesVo"/>
+        where courseid = #{courseid}
+    </select>
+        
+    <insert id="insertYspsCourses" parameterType="YspsCourses" useGeneratedKeys="true" keyProperty="courseid">
+        insert into ysps_courses
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="coursename != null and coursename != ''">coursename,</if>
+            <if test="teacher != null and teacher != ''">teacher,</if>
+            <if test="classtime != null">classtime,</if>
+            <if test="location != null">location,</if>
+            <if test="coursetype != null and coursetype != ''">coursetype,</if>
+            <if test="credits != null">credits,</if>
+            <if test="description != null">description,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="coursename != null and coursename != ''">#{coursename},</if>
+            <if test="teacher != null and teacher != ''">#{teacher},</if>
+            <if test="classtime != null">#{classtime},</if>
+            <if test="location != null">#{location},</if>
+            <if test="coursetype != null and coursetype != ''">#{coursetype},</if>
+            <if test="credits != null">#{credits},</if>
+            <if test="description != null">#{description},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsCourses" parameterType="YspsCourses">
+        update ysps_courses
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="coursename != null and coursename != ''">coursename = #{coursename},</if>
+            <if test="teacher != null and teacher != ''">teacher = #{teacher},</if>
+            <if test="classtime != null">classtime = #{classtime},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="coursetype != null and coursetype != ''">coursetype = #{coursetype},</if>
+            <if test="credits != null">credits = #{credits},</if>
+            <if test="description != null">description = #{description},</if>
+        </trim>
+        where courseid = #{courseid}
+    </update>
+
+    <delete id="deleteYspsCoursesByCourseid" parameterType="Long">
+        delete from ysps_courses where courseid = #{courseid}
+    </delete>
+
+    <delete id="deleteYspsCoursesByCourseids" parameterType="String">
+        delete from ysps_courses where courseid in 
+        <foreach item="courseid" collection="array" open="(" separator="," close=")">
+            #{courseid}
+        </foreach>
+    </delete>
+</mapper>

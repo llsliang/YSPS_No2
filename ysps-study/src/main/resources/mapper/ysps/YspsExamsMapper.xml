@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ysps.ysps.mapper.YspsExamsMapper">
+    
+    <resultMap type="YspsExams" id="YspsExamsResult">
+        <result property="examid"    column="examid"    />
+        <result property="subject"    column="subject"    />
+        <result property="examtime"    column="examtime"    />
+        <result property="examlocation"    column="examlocation"    />
+        <result property="examtype"    column="examtype"    />
+        <result property="examformat"    column="examformat"    />
+        <result property="grade"    column="grade"    />
+        <result property="username"    column="username"    />
+    </resultMap>
+
+    <sql id="selectYspsExamsVo">
+        select examid, subject, examtime, examlocation, examtype, examformat, grade, username from ysps_exams
+    </sql>
+
+    <select id="selectYspsExamsList" parameterType="YspsExams" resultMap="YspsExamsResult">
+        <include refid="selectYspsExamsVo"/>
+        <where>  
+            <if test="subject != null  and subject != ''"> and subject = #{subject}</if>
+            <if test="examtype != null  and examtype != ''"> and examtype = #{examtype}</if>
+            <if test="examformat != null  and examformat != ''"> and examformat = #{examformat}</if>
+            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectYspsExamsByExamid" parameterType="Long" resultMap="YspsExamsResult">
+        <include refid="selectYspsExamsVo"/>
+        where examid = #{examid}
+    </select>
+        
+    <insert id="insertYspsExams" parameterType="YspsExams" useGeneratedKeys="true" keyProperty="examid">
+        insert into ysps_exams
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="subject != null and subject != ''">subject,</if>
+            <if test="examtime != null">examtime,</if>
+            <if test="examlocation != null and examlocation != ''">examlocation,</if>
+            <if test="examtype != null and examtype != ''">examtype,</if>
+            <if test="examformat != null and examformat != ''">examformat,</if>
+            <if test="grade != null">grade,</if>
+            <if test="username != null and username != ''">username,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="subject != null and subject != ''">#{subject},</if>
+            <if test="examtime != null">#{examtime},</if>
+            <if test="examlocation != null and examlocation != ''">#{examlocation},</if>
+            <if test="examtype != null and examtype != ''">#{examtype},</if>
+            <if test="examformat != null and examformat != ''">#{examformat},</if>
+            <if test="grade != null">#{grade},</if>
+            <if test="username != null and username != ''">#{username},</if>
+         </trim>
+    </insert>
+
+    <update id="updateYspsExams" parameterType="YspsExams">
+        update ysps_exams
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="subject != null and subject != ''">subject = #{subject},</if>
+            <if test="examtime != null">examtime = #{examtime},</if>
+            <if test="examlocation != null and examlocation != ''">examlocation = #{examlocation},</if>
+            <if test="examtype != null and examtype != ''">examtype = #{examtype},</if>
+            <if test="examformat != null and examformat != ''">examformat = #{examformat},</if>
+            <if test="grade != null">grade = #{grade},</if>
+            <if test="username != null and username != ''">username = #{username},</if>
+        </trim>
+        where examid = #{examid}
+    </update>
+
+    <delete id="deleteYspsExamsByExamid" parameterType="Long">
+        delete from ysps_exams where examid = #{examid}
+    </delete>
+
+    <delete id="deleteYspsExamsByExamids" parameterType="String">
+        delete from ysps_exams where examid in 
+        <foreach item="examid" collection="array" open="(" separator="," close=")">
+            #{examid}
+        </foreach>
+    </delete>
+</mapper>
